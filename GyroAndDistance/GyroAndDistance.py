@@ -70,6 +70,6 @@ try:
         
         # Update the graph
         plt.draw()
-        plt.pause(0.1)  # Pause for half a second to see the update
+        plt.pause(0.1)  # Pause to see the update
 except KeyboardInterrupt:
     print("Loop terminated by user.")
