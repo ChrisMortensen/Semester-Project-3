@@ -1,4 +1,4 @@
-from lib import Robot
+from jetbot import Robot
 import time
 
 
