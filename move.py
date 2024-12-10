@@ -1,5 +1,9 @@
 from jetbot import Robot
 import time
+import threading
+from sensorInput import getSensorInput
+from sensorInput import zRotation
+from sensorInput import distance
 
 #pip install traitlets
 #pip install Adafruit-MotorHAT
@@ -36,7 +40,13 @@ def smooth_start(robot, steps, speed):
 		robot.right_motor.value = right_value
 
 		time.sleep(0.5 / steps)
-#Movement
+
+#Sensorinput 
+thread = threading.Thread(target=getSensorInput)
+thread.daemon = True
+thread.start()
+
+#Robot Actions
 robot = Robot()
 
 robot.left(0.3)
