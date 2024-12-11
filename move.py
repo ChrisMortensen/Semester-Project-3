@@ -41,6 +41,22 @@ def smooth_start(robot, steps, speed):
 
 		time.sleep(0.5 / steps)
 
+def forward(angle, speed):
+	angleDiff = angle-zRotation
+	if abs(angleDiff) < 1.5:
+		robot.forward(speed)
+	elif angleDiff < 0:
+		robot.left(speed * abs(angleDiff) / 180)
+	elif angleDiff > 0:
+		robot.right(speed * abs(angleDiff) / 180)
+
+def drive_until(dist, speed):
+	angle = zRotation
+	while distance > dist:
+		forward(angle, speed)
+		time.sleep(0.2)
+	robot.stop()
+
 #Sensorinput 
 thread = threading.Thread(target=getSensorInput)
 thread.daemon = True
@@ -49,6 +65,4 @@ thread.start()
 #Robot Actions
 robot = Robot()
 
-robot.left(0.3)
-time.sleep(0.5)
-smooth_stop(robot, 4)
+drive_until(20, 0.1)
