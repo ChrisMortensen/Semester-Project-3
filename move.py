@@ -1,13 +1,16 @@
 from jetbot import Robot
 import time
 import threading
-from sensorInput import getSensorInput
-from sensorInput import zRotation
-from sensorInput import distance
+from sensorInput import *
 
 #pip install traitlets
 #pip install Adafruit-MotorHAT
 #pip install sparkfun-qwiic
+
+map = []		# The map of points
+offset = [] 	# The position of the robot in the room relative to its original position
+offset[0] = 0
+offset[1] = 0
 
 def smooth_stop(robot, steps):
 	left_value = robot.left_motor.value
@@ -52,15 +55,30 @@ def forward(angle, speed):
 
 def drive_until(dist, speed):
 	angle = zRotation
+	totalDistance = distance
 	while distance > dist:
 		forward(angle, speed)
 		time.sleep(0.2)
 	robot.stop()
 
+def calcOffset(dDistance):
+	zRotation_radians = math.radians(zRotation)
+	
+	# Calculate the x and y components of the unit vector, then scale by distance
+	x = dDistance * math.cos(zRotation_radians)	# x component scaled by distance
+	y = dDistance * math.sin(zRotation_radians)	# y component scaled by distance
+	return
+
+def map():
+	calcOffset()
+	x, y = rawPoints[-1]
+	map.append(x + offset[0], y + offset[1])
+
 #Sensorinput 
 thread = threading.Thread(target=getSensorInput)
 thread.daemon = True
 thread.start()
+time.sleep(2)
 
 #Robot Actions
 robot = Robot()

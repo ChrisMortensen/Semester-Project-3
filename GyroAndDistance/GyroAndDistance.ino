@@ -12,8 +12,9 @@ unsigned long lastTime = 0;
 float gyroZBias = 0.0; 
 
 
-const int trigPin1 = 9;
-const int echoPin1 = 10;
+const int trigPin1 = 23;
+const int echoPin1 = 22;
+const int powerPin1 = 7;
 //const int trigPin2 = 11;
 //const int echoPin2 = 12;
 
@@ -51,6 +52,8 @@ void loop() {
 void distanceSetup(){
   pinMode(trigPin1, OUTPUT);
   pinMode(echoPin1, INPUT);
+  pinMode(powerPin1, OUTPUT);
+  digitalWrite(powerPin1, HIGH);
   //pinMode(trigPin2, OUTPUT);
   //pinMode(echoPin2, INPUT);
 }
