@@ -55,22 +55,24 @@ def forward(angle, speed):
 
 def drive_until(dist, speed):
 	angle = zRotation
-	totalDistance = distance
+	initialDistance = distance
 	while distance > dist:
 		forward(angle, speed)
 		time.sleep(0.2)
 	robot.stop()
+	dDist = initialDistance - distance
+	calcOffset(dDist, angle)
 
-def calcOffset(dDistance):
+def calcOffset(dist, angle):
 	zRotation_radians = math.radians(zRotation)
 	
 	# Calculate the x and y components of the unit vector, then scale by distance
-	x = dDistance * math.cos(zRotation_radians)	# x component scaled by distance
-	y = dDistance * math.sin(zRotation_radians)	# y component scaled by distance
-	return
+	x = dist * math.cos(zRotation_radians)	# x component scaled by distance
+	y = dist * math.sin(zRotation_radians)	# y component scaled by distance
+	offset[0] += x
+	offset[1] += y
 
 def map():
-	calcOffset()
 	x, y = rawPoints[-1]
 	map.append(x + offset[0], y + offset[1])
 

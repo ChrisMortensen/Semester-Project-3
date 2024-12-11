@@ -42,7 +42,7 @@ void setup() {
 
 void loop() {
   calcRotation();
-  calcDistance(9, 10);
+  calcDistance(trigPin1, echoPin1);
   Serial.print(angleZ);
   Serial.print(" ");
   Serial.println(distance);
