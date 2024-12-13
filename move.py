@@ -52,10 +52,10 @@ def forward(angle, speed):
 		robot.forward(speed)
 	elif angleDiff < 0:
 		print("5")
-		robot.left(speed * abs(angleDiff) / 180)
+		robot.left(speed)# * abs(angleDiff) / 180)
 	elif angleDiff > 0:
 		print("6")
-		robot.right(speed * abs(angleDiff) / 180)
+		robot.right(speed)# * abs(angleDiff) / 180)
 	print("7")
 
 def drive_until(dist, speed):
@@ -65,7 +65,7 @@ def drive_until(dist, speed):
 	while distance > dist:
 		print("2")
 		forward(angle, speed)
-		time.sleep(0.2)
+		time.sleep(0.4)
 	print("8")
 	robot.stop()
 	dDist = initialDistance - distance
