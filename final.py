@@ -46,6 +46,7 @@ def getSensorInput():
 			try:
 				gyro_input, distance_input = input_data.split()
 				#Normalize angle to 0–360 or -180 to 180
+				gyro_input = float(gyro_input)
 				if gyro_input > 180:
 					gyro_input -= 360
 				elif (gyro_input < -180):
