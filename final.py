@@ -25,6 +25,9 @@ offset[1] = 0
 turnSpeed = 0.045
 maxOffsetAngle = 5
 
+ser = serial.Serial(arduino_port, baud_rate, timeout=1)
+time.sleep(2)
+
 def findPointValue(points, zRotation, distance):
 	# Convert zRotation to radians
 	zRotation_radians = math.radians(zRotation)
@@ -37,6 +40,7 @@ def findPointValue(points, zRotation, distance):
 def getSensorInput():
 	global zRotation, distance
 	while True:
+		ser.reset_input_buffer()  # Clear the serial input buffer
 		if ser.in_waiting > 0:
 			input_data = ser.readline().decode('utf-8').strip()	# Read line, decode to string, and strip newline
 			try:
@@ -118,12 +122,10 @@ def map():
 	map.append(x + offset[0], y + offset[1])
 
 #Sensorinput 
-ser = serial.Serial(arduino_port, baud_rate, timeout=1)
-time.sleep(2)
 thread = threading.Thread(target=getSensorInput)
 thread.daemon = True
 thread.start()
-time.sleep(2)
+time.sleep(1)
 
 #Robot Actions
 robot = Robot()
