@@ -22,7 +22,8 @@ map = []		# The map of points
 offset = [0,0] 	# The position of the robot in the room relative to its original position
 offset[0] = 0
 offset[1] = 0
-turnSpeed = 0.4
+turnSpeed = 0.085
+maxOffsetAngle = 5
 
 def findPointValue(points, zRotation, distance):
 	# Convert zRotation to radians
@@ -82,12 +83,15 @@ def smooth_start(robot, steps, speed):
 
 def forward(angle, speed):
 	angleDiff = angle-zRotation
-	if abs(angleDiff) < 3:
+	if abs(angleDiff) < maxOffsetAngle:
 		robot.forward(speed)
-	elif angleDiff < 0:
-		robot.left(speed * abs(angleDiff) / turnSpeed)
-	elif angleDiff > 0:
-		robot.right(speed * abs(angleDiff) / turnSpeed)
+	else:
+		while abs(angleDiff) + 1 > maxOffsetAngle:
+			if angleDiff < 0:
+				robot.left(turnSpeed)
+			if angleDiff > 0:
+				robot.right(turnSpeed)
+			angleDiff = angle-zRotation
 
 def drive_until(dist, speed):
 	angle = zRotation
@@ -122,6 +126,5 @@ time.sleep(2)
 #Robot Actions
 robot = Robot()
 print("Stating")
-#drive_until(20, 0.1)
-robot.left(0.5 * turnSpeed)
+drive_until(20, 0.1)
 print("Done")
