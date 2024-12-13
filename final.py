@@ -1,7 +1,6 @@
 from jetbot import Robot
 import time
 import threading
-from sensorInput import *
 import math
 import serial
 
