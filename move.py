@@ -64,11 +64,11 @@ def drive_until(dist, speed):
 	calcOffset(dDist, angle)
 
 def calcOffset(dist, angle):
-	zRotation_radians = math.radians(zRotation)
+	angle_radians = math.radians(angle)
 	
 	# Calculate the x and y components of the unit vector, then scale by distance
-	x = dist * math.cos(zRotation_radians)	# x component scaled by distance
-	y = dist * math.sin(zRotation_radians)	# y component scaled by distance
+	x = dist * math.cos(angle_radians)	# x component scaled by distance
+	y = dist * math.sin(angle_radians)	# y component scaled by distance
 	offset[0] += x
 	offset[1] += y
 

@@ -3,7 +3,7 @@ import time
 import serial
 
 # Specify the serial port and baud rate
-arduino_port = "COM4"  # Replace with your Arduino's port
+arduino_port = "/dev/ttyACM0"  # Replace with your Arduino's port
 baud_rate = 9600	   # Match this with the Arduino's baud rate
 
 # Initial values

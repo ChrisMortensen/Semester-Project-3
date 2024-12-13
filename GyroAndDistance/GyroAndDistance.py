@@ -12,7 +12,7 @@ plt.ion()  # Turn on interactive mode for real-time plotting
 fig, ax = plt.subplots()
 
 # Specify the serial port and baud rate
-arduino_port = "COM4"  # Replace with your Arduino's port
+arduino_port = "dev/ttyAMC0"  # Replace with your Arduino's port
 baud_rate = 9600	   # Match this with the Arduino's baud rate
 
 zRotation = 0  # Initial value for rotation
@@ -25,8 +25,8 @@ def getGyroValue():
     while True:
         if ser.in_waiting > 0:
             input_data = ser.readline().decode('utf-8').strip()  # Read line, decode to string, and strip newline
-            gyro_input, distance_input = input_data.split()
             try:
+                gyro_input, distance_input = input_data.split()
                 zRotation = float(gyro_input)  # Assuming the gyro returns numeric values
                 distance = float(distance_input)
                 
