@@ -28,8 +28,8 @@ def getSensorInput():
 	while True:
 		if ser.in_waiting > 0:
 			input_data = ser.readline().decode('utf-8').strip()  # Read line, decode to string, and strip newline
-			gyro_input, distance_input = input_data.split()
 			try:
+				gyro_input, distance_input = input_data.split()
 				zRotation = float(gyro_input)  # Assuming the gyro returns numeric values
 				distance = float(distance_input)
 				
