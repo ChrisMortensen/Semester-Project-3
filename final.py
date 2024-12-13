@@ -22,6 +22,7 @@ map = []		# The map of points
 offset = [0,0] 	# The position of the robot in the room relative to its original position
 offset[0] = 0
 offset[1] = 0
+turnSpeed = 0.4
 
 def findPointValue(points, zRotation, distance):
 	# Convert zRotation to radians
@@ -84,15 +85,14 @@ def forward(angle, speed):
 	if abs(angleDiff) < 3:
 		robot.forward(speed)
 	elif angleDiff < 0:
-		robot.left(speed * abs(angleDiff) / 10)
+		robot.left(speed * abs(angleDiff) / turnSpeed)
 	elif angleDiff > 0:
-		robot.right(speed * abs(angleDiff) / 10)
+		robot.right(speed * abs(angleDiff) / turnSpeed)
 
 def drive_until(dist, speed):
 	angle = zRotation
 	initialDistance = distance
 	while distance > dist:
-		print(distance)
 		forward(angle, speed)
 		time.sleep(0.2)
 	robot.stop()
@@ -122,5 +122,6 @@ time.sleep(2)
 #Robot Actions
 robot = Robot()
 print("Stating")
-drive_until(20, 0.1)
+#drive_until(20, 0.1)
+robot.left(0.5 * turnSpeed)
 print("Done")
