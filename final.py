@@ -95,11 +95,17 @@ def forward(angle, speed):
 		robot.right_motor.value = speed * 0.5
 	else:
 		if angleDiff < 0:
-			robot.left_motor.value = speed * (0.5 - turnSpeed)
-			robot.right_motor.value = speed * (0.5 + turnSpeed)
+			drive_left(speed)
 		if angleDiff > 0:
-			robot.left_motor.value = speed * (0.5 + turnSpeed)
-			robot.right_motor.value = speed * (0.5 - turnSpeed)
+			drive_right(speed)
+
+def drive_left(speed):
+	robot.left_motor.value = speed * (0.5 - turnSpeed)
+	robot.right_motor.value = speed * (0.5 + turnSpeed)
+
+def drive_right(speed):
+	robot.left_motor.value = speed * (0.5 + turnSpeed)
+	robot.right_motor.value = speed * (0.5 - turnSpeed)
 
 def drive_until(dist, speed):
 	angle = zRotation
@@ -132,5 +138,9 @@ time.sleep(1)
 #Robot Actions
 robot = Robot()
 print("Stating")
-drive_until(20, 0.2)
+drive_left(0.2)
+time.sleep(2)
+drive_right(0.2)
+time.sleep(2)
+#drive_until(20, 0.2)
 print("Done")
