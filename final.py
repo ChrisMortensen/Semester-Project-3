@@ -23,6 +23,7 @@ offset[0] = 0
 offset[1] = 0
 turnSpeed = 0.045
 maxOffsetAngle = 5
+firstValues = True
 
 ser = serial.Serial(arduino_port, baud_rate, timeout=1)
 time.sleep(2)
@@ -44,9 +45,12 @@ def getSensorInput():
 			input_data = ser.readline().decode('utf-8').strip()	# Read line, decode to string, and strip newline
 			try:
 				gyro_input, distance_input = input_data.split()
-				zRotation = float(gyro_input)	# Assuming the gyro returns numeric values
+				if firstValues:
+					firstValues = False
+					zRotationOffset = zRotation
+				zRotation = float(gyro_input) - zRotationOffset	# Assuming the gyro returns numeric values
 				distance = float(distance_input)
-				
+					
 				# Find the new x and y values based on the current zRotation and distance
 				findPointValue(rawPoints, zRotation, distance)
 			except ValueError:
