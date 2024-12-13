@@ -38,8 +38,8 @@ def findPointValue(points, zRotation, distance):
 
 def getSensorInput():
 	global zRotation, distance
+	ser.reset_input_buffer()  # Clear the serial input buffer
 	while True:
-		ser.reset_input_buffer()  # Clear the serial input buffer
 		if ser.in_waiting > 0:
 			input_data = ser.readline().decode('utf-8').strip()	# Read line, decode to string, and strip newline
 			try:
@@ -90,14 +90,12 @@ def forward(angle, speed):
 		robot.left_motor.value = speed * 0.5
 		robot.right_motor.value = speed * 0.5
 	else:
-		while abs(angleDiff) > maxOffsetAngle:
-			if angleDiff < 0:
-				robot.left_motor.value = speed * (0.5 - turnSpeed)
-				robot.right_motor.value = speed * (0.5 + turnSpeed)
-			if angleDiff > 0:
-				robot.left_motor.value = speed * (0.5 + turnSpeed)
-				robot.right_motor.value = speed * (0.5 - turnSpeed)
-			angleDiff = angle-zRotation
+		if angleDiff < 0:
+			robot.left_motor.value = speed * (0.5 - turnSpeed)
+			robot.right_motor.value = speed * (0.5 + turnSpeed)
+		if angleDiff > 0:
+			robot.left_motor.value = speed * (0.5 + turnSpeed)
+			robot.right_motor.value = speed * (0.5 - turnSpeed)
 
 def drive_until(dist, speed):
 	angle = zRotation
