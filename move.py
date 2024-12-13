@@ -8,7 +8,7 @@ from sensorInput import *
 #pip install sparkfun-qwiic
 
 map = []		# The map of points
-offset = [] 	# The position of the robot in the room relative to its original position
+offset = [0,0] 	# The position of the robot in the room relative to its original position
 offset[0] = 0
 offset[1] = 0
 

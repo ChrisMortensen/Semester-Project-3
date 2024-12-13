@@ -14,7 +14,7 @@ rawPoints = []		# The values for the points in the room
 ser = serial.Serial(arduino_port, baud_rate, timeout=1)
 time.sleep(2)
 
-def findPointValue(points, zRotation, distance, offset):
+def findPointValue(points, zRotation, distance):
 	# Convert zRotation to radians
 	zRotation_radians = math.radians(zRotation)
 	
