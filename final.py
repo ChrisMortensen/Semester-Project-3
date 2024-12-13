@@ -81,12 +81,12 @@ def smooth_start(robot, steps, speed):
 
 def forward(angle, speed):
 	angleDiff = angle-zRotation
-	if abs(angleDiff) < 1.5:
+	if abs(angleDiff) < 3:
 		robot.forward(speed)
 	elif angleDiff < 0:
-		robot.left(speed)# * abs(angleDiff) / 180)
+		robot.left(speed * abs(angleDiff) / 10)
 	elif angleDiff > 0:
-		robot.right(speed)# * abs(angleDiff) / 180)
+		robot.right(speed * abs(angleDiff) / 10)
 
 def drive_until(dist, speed):
 	angle = zRotation
@@ -94,7 +94,7 @@ def drive_until(dist, speed):
 	while distance > dist:
 		print(distance)
 		forward(angle, speed)
-		time.sleep(0.3)
+		time.sleep(0.2)
 	robot.stop()
 	dDist = initialDistance - distance
 	calcOffset(dDist, angle)
