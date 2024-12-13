@@ -102,6 +102,7 @@ def drive_until(dist, speed):
 	initialDistance = distance
 	while distance > dist:
 		forward(angle, speed)
+		print(zRotation)
 	robot.stop()
 	dDist = initialDistance - distance
 	calcOffset(dDist, angle)
@@ -127,5 +128,5 @@ time.sleep(1)
 #Robot Actions
 robot = Robot()
 print("Stating")
-drive_until(20, 0.1)
+drive_until(20, 0.2)
 print("Done")
