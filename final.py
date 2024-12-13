@@ -22,8 +22,8 @@ offset = [0,0] 	# The position of the robot in the room relative to its original
 offset[0] = 0
 offset[1] = 0
 turnSpeed = 0.045
-maxOffsetAngle = 5
-firstValues = True
+maxOffsetAngle = 2
+firstValues = False
 
 ser = serial.Serial(arduino_port, baud_rate, timeout=1)
 time.sleep(2)
@@ -38,23 +38,27 @@ def findPointValue(points, zRotation, distance):
 	points.append((x,y))
 
 def getSensorInput():
-	global zRotation, distance
+	global zRotation, distance, firstValues  # Declare firstValues as global
 	ser.reset_input_buffer()  # Clear the serial input buffer
 	while True:
 		if ser.in_waiting > 0:
-			input_data = ser.readline().decode('utf-8').strip()	# Read line, decode to string, and strip newline
+			input_data = ser.readline().decode('utf-8').strip()  # Read line, decode to string, and strip newline
 			try:
 				gyro_input, distance_input = input_data.split()
-				if firstValues:
-					firstValues = False
-					zRotationOffset = zRotation
-				zRotation = float(gyro_input) - zRotationOffset	# Assuming the gyro returns numeric values
+				#Normalize angle to 0–360 or -180 to 180
+				if gyro_input > 180:
+					gyro_input -= 360
+				elif (gyro_input < -180):
+					gyro_input += 360
+				if not firstValues:  # Check if firstValues is False
+					firstValues = True
+					zRotationOffset = float(gyro_input)
+				zRotation = float(gyro_input) - zRotationOffset  # Assuming the gyro returns numeric values
 				distance = float(distance_input)
-					
 				# Find the new x and y values based on the current zRotation and distance
-				findPointValue(rawPoints, zRotation, distance)
+				# findPointValue(rawPoints, zRotation, distance)
 			except ValueError:
-				pass	# Ignore if the value is not a valid float
+				pass  # Ignore if the value is not a valid float
 			
 def smooth_stop(robot, steps):
 	left_value = robot.left_motor.value
@@ -94,20 +98,21 @@ def forward(angle, speed):
 		robot.left_motor.value = speed
 		robot.right_motor.value = speed * 1.095
 	else:
-		if angleDiff < 0:
-			robot.left_motor.value -= 0.005
 		if angleDiff > 0:
-			robot.right_motor.value -= 0.005
+			print("Turn more left | " + str(angleDiff))
+			robot.right_motor.value += 0.002
+		if angleDiff < 0:
+			print("Turn more right | " + str(angleDiff))
+			robot.left_motor.value += 0.002
 
 def drive_until(dist, speed):
 	angle = zRotation
 	initialDistance = distance
 	while distance > dist:
 		forward(angle, speed)
-		print(zRotation)
 	robot.stop()
-	dDist = initialDistance - distance
-	calcOffset(dDist, angle)
+	#dDist = initialDistance - distance
+	#calcOffset(dDist, angle)
 
 def calcOffset(dist, angle):
 	angle_radians = math.radians(angle)
@@ -131,7 +136,5 @@ time.sleep(1)
 #Robot Actions
 robot = Robot()
 print("Stating")
-
 drive_until(20, 0.2)
-
 print("Done")

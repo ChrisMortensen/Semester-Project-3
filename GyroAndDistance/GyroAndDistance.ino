@@ -100,10 +100,6 @@ void calcRotation(){
   // Integrate angular velocity to calculate angle
   angleZ += gyroZ * dt;
 
-  // Normalize angle to 0–360 or -180 to 180
-  if (angleZ > 180) angleZ -= 360;
-  else if (angleZ < -180) angleZ += 360;
-
   // Output the angle
   //return angleZ;
 }
