@@ -45,32 +45,42 @@ def smooth_start(robot, steps, speed):
 		time.sleep(0.5 / steps)
 
 def forward(angle, speed):
+	print("3")
 	angleDiff = angle-zRotation
 	if abs(angleDiff) < 1.5:
+		print("4")
 		robot.forward(speed)
 	elif angleDiff < 0:
+		print("5")
 		robot.left(speed * abs(angleDiff) / 180)
 	elif angleDiff > 0:
+		print("6")
 		robot.right(speed * abs(angleDiff) / 180)
+	print("7")
 
 def drive_until(dist, speed):
+	print("1")
 	angle = zRotation
 	initialDistance = distance
 	while distance > dist:
+		print("2")
 		forward(angle, speed)
 		time.sleep(0.2)
+	print("8")
 	robot.stop()
 	dDist = initialDistance - distance
+	print("9")
 	calcOffset(dDist, angle)
 
 def calcOffset(dist, angle):
 	angle_radians = math.radians(angle)
-	
+	print("10")
 	# Calculate the x and y components of the unit vector, then scale by distance
 	x = dist * math.cos(angle_radians)	# x component scaled by distance
 	y = dist * math.sin(angle_radians)	# y component scaled by distance
 	offset[0] += x
 	offset[1] += y
+	print("11")
 
 def map():
 	x, y = rawPoints[-1]
@@ -84,5 +94,6 @@ time.sleep(2)
 
 #Robot Actions
 robot = Robot()
-
+print("0")
 drive_until(20, 0.1)
+print("12")
