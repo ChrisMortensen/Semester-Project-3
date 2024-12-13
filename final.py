@@ -92,13 +92,14 @@ def forward(angle, speed):
 			if angleDiff > 0:
 				robot.right(turnSpeed)
 			angleDiff = angle-zRotation
+			time.sleep(0.2)
+
 
 def drive_until(dist, speed):
 	angle = zRotation
 	initialDistance = distance
 	while distance > dist:
 		forward(angle, speed)
-		time.sleep(0.2)
 	robot.stop()
 	dDist = initialDistance - distance
 	calcOffset(dDist, angle)
