@@ -95,17 +95,9 @@ def forward(angle, speed):
 		robot.right_motor.value = speed * 0.5
 	else:
 		if angleDiff < 0:
-			drive_left(speed)
+			leftValues(speed)
 		if angleDiff > 0:
-			drive_right(speed)
-
-def drive_left(speed):
-	robot.left_motor.value = speed * (0.5 - turnSpeed)
-	robot.right_motor.value = speed * (0.5 + turnSpeed)
-
-def drive_right(speed):
-	robot.left_motor.value = speed * (0.5 + turnSpeed)
-	robot.right_motor.value = speed * (0.5 - turnSpeed)
+			rightValues(speed)
 
 def drive_until(dist, speed):
 	angle = zRotation
@@ -129,6 +121,18 @@ def map():
 	x, y = rawPoints[-1]
 	map.append(x + offset[0], y + offset[1])
 
+def forwardValues(speed):
+	robot.left_motor.value = speed
+	robot.right_motor.value = speed * 1.08
+
+def leftValues(speed):
+	robot.left_motor.value = speed * (0.5 - turnSpeed)
+	robot.right_motor.value = speed * (0.5 + turnSpeed)
+
+def rightValues(speed):
+	robot.left_motor.value = speed * (0.5 + turnSpeed) / 3 
+	robot.right_motor.value = speed * (0.5 - turnSpeed) / 3
+
 #Sensorinput 
 thread = threading.Thread(target=getSensorInput)
 thread.daemon = True
@@ -138,9 +142,13 @@ time.sleep(1)
 #Robot Actions
 robot = Robot()
 print("Stating")
-drive_left(0.2)
+
+forwardValues(0.2)
 time.sleep(2)
-drive_right(0.2)
-time.sleep(2)
+
+#drive_left(0.2)
+#time.sleep(2)
+#drive_right(0.2)
+#time.sleep(2)
 #drive_until(20, 0.2)
 print("Done")
