@@ -91,13 +91,13 @@ def smooth_start(robot, steps, speed):
 def forward(angle, speed):
 	angleDiff = angle-zRotation
 	if abs(angleDiff) < maxOffsetAngle:
-		robot.left_motor.value = speed * 0.5
-		robot.right_motor.value = speed * 0.5
+		robot.left_motor.value = speed
+		robot.right_motor.value = speed * 1.095
 	else:
 		if angleDiff < 0:
-			leftValues(speed)
+			robot.left_motor.value -= 0.005
 		if angleDiff > 0:
-			rightValues(speed)
+			robot.right_motor.value -= 0.005
 
 def drive_until(dist, speed):
 	angle = zRotation
@@ -121,17 +121,6 @@ def map():
 	x, y = rawPoints[-1]
 	map.append(x + offset[0], y + offset[1])
 
-def forwardValues(speed):
-	robot.left_motor.value = speed
-	robot.right_motor.value = speed * 1.08
-
-def leftValues(speed):
-	robot.left_motor.value = speed * (0.5 - turnSpeed)
-	robot.right_motor.value = speed * (0.5 + turnSpeed)
-
-def rightValues(speed):
-	robot.left_motor.value = speed * (0.5 + turnSpeed) / 3 
-	robot.right_motor.value = speed * (0.5 - turnSpeed) / 3
 
 #Sensorinput 
 thread = threading.Thread(target=getSensorInput)
@@ -143,12 +132,6 @@ time.sleep(1)
 robot = Robot()
 print("Stating")
 
-forwardValues(0.2)
-time.sleep(2)
+drive_until(20, 0.2)
 
-#drive_left(0.2)
-#time.sleep(2)
-#drive_right(0.2)
-#time.sleep(2)
-#drive_until(20, 0.2)
 print("Done")
