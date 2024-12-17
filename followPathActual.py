@@ -1,4 +1,4 @@
-from jetbot import Robot
+##from jetbot import Robot
 import time
 import threading
 import math
@@ -6,12 +6,16 @@ import serial
 import matplotlib.pyplot as plt
 from collections import Counter
 
-robot = Robot()
+#robot = Robot()
 
 arduino_port = "/dev/ttyACM0"  
 baud_rate = 9600               
 
 # Initial values
+minX = 0
+minY = 0
+maxX = 20
+maxY = 20
 zRotation = 0
 zRotationRaw = 0
 distance = 0    
@@ -22,15 +26,19 @@ firstValues = False
 correction_factor = 1.095  
 targetAngle = 0
 normalized_coords = []
-lines = []
+lines = [
+    [(minX, minY), (minX, maxY)],       # Left box wall
+    [(minX, maxY), (maxX, maxY)],       # Top box wall
+    [(maxX, maxY), (maxX, minY)],       # Right box wall
+    [(minX, minY), (maxX, minY)]]
 grid = []
 grid_size_x = 20
 grid_size_y = 20
-maxX = 0
 
 
-ser = serial.Serial(arduino_port, baud_rate, timeout=1)
-time.sleep(2)
+
+#ser = serial.Serial(arduino_port, baud_rate, timeout=1)
+#time.sleep(2)
 
 def findPointValue(points, zRotation, distance):
     zRotation_radians = math.radians(zRotation)
@@ -342,13 +350,62 @@ def a_star(grid, start, end):
 
 def followPath(grid, start, end):
     completedPath = a_star(grid, start, end)
-    for node in completedPath:
-        xOffset = completedPath[node].x - completedPath[node + 1].x
-        yOffset = 
+    currentHeading = 0  # Assuming robot starts facing 'up' (0 degrees)
 
+    for i in range(len(completedPath) - 1):
+        # Calculate the movement direction from current to next position
+        xOffset = completedPath[i + 1].x - completedPath[i].x
+        yOffset = completedPath[i + 1].y - completedPath[i].y
+        
+        # Calculate the target angle relative to the robot's current heading
+        targetHeading = rotateRelativeToPath(xOffset, yOffset, currentHeading)
+        
+        # Calculate the angle to turn (smallest rotation)
+        angleToTurn = targetHeading - currentHeading
+        if angleToTurn > 180:
+            angleToTurn -= 360  # Turn counter-clockwise (smaller angle)
+        elif angleToTurn < -180:
+            angleToTurn += 360  # Turn clockwise (smaller angle)
 
-def rotateRelativeToPath(x, y, robotCurrentAngleOffset):
+        # Output the move with the turn angle
+        print(f"Turning {angleToTurn} degrees to move from position: "
+              f"({completedPath[i].x}, {completedPath[i].y}) "
+              f"to position ({completedPath[i + 1].x}, {completedPath[i + 1].y}).")
+
+        # Rotate and drive forward
+        currentHeading = targetHeading  # Update robot's heading
+        #rotate(angleToTurn)
+        #robot.drive(5cm whatever)
+        print("Driving forward 5 cm.")
+        
+        # Update the current heading
+        print("New heading: {currentHeading} degrees.")
+
+def rotateRelativeToPath(x, y, currentHeading):
+    # Calculate the target heading based on x and y offset
     if x == 1 and y == 1:
+        targetHeading = 45
+    elif x == 1 and y == 0:
+        targetHeading = 90
+    elif x == 1 and y == -1:
+        targetHeading = 135
+    elif x == 0 and y == 1:
+        targetHeading = 0
+    elif x == 0 and y == -1:
+        targetHeading = 180
+    elif x == -1 and y == 1:
+        targetHeading = -45
+    elif x == -1 and y == 0:
+        targetHeading = -90
+    elif x == -1 and y == -1:
+        targetHeading = -135
+    else:
+        print("Coords out of range - something is wrong.")
+        return None
+    
+    return targetHeading
+
+
 
 
 
@@ -361,13 +418,21 @@ thread.start()
 time.sleep(1)
 
 # Start robot actions
-print("Starting spin and mapping...")
-spin_and_map()
-render_map_ascii()
-print(rawPoints)
-connect_points()
-draw_lines()
-print(find_robot_position()) 
+#print("Starting spin and mapping...")
+#spin_and_map()
+#render_map_ascii()
+#print(rawPoints)
+#connect_points()
+#draw_lines()
+#print(find_robot_position()) 
 
-stop_sensor_thread()  # Stop sensor input thread after completion
-print("Done")
+#stop_sensor_thread()  # Stop sensor input thread after completion
+#print("Done")
+
+#Test pathfollowing
+
+make_grid()
+# Find start and end nodes based on the coordinates
+start_node = grid[8][7]  # row, column
+end_node = grid[3][3]  # replace with desired target coordinates
+followPath(grid, start_node, end_node)
