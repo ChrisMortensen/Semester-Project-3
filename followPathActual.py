@@ -172,7 +172,7 @@ def map_points():
         robot_map.append((mapped_x, mapped_y))
 
 def connect_points():
-    global normalized_coords, lines, maxX
+    global normalized_coords, lines
     needed_count = 3
     # Extract x and y values
 
@@ -221,7 +221,7 @@ def draw_lines():
     plt.show()
 
 def find_robot_position():
-    global normalized_coords, robot_position
+    global normalized_coords, robot_position, max_x
 
     # Extract x and y values
     x_values = [point[0][0] for point in normalized_coords]
@@ -340,6 +340,19 @@ def a_star(grid, start, end):
             neighbor.f_score = neighbor.g_score + h_score(neighbor, end)
 
 
+def followPath(grid, start, end):
+    completedPath = a_star(grid, start, end)
+    for node in completedPath:
+        xOffset = completedPath[node].x - completedPath[node + 1].x
+        yOffset = 
+
+
+def rotateRelativeToPath(x, y, robotCurrentAngleOffset):
+    if x == 1 and y == 1:
+
+
+
+# 100 / maxX for sidelængde af node
 
 # Sensor input thread
 thread = threading.Thread(target=getSensorInput)
