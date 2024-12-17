@@ -342,6 +342,7 @@ def a_star(grid, start, end):
 
 def followPath(grid, start, end):
     completedPath = a_star(grid, start, end)
+    intialOffset = 0
     for node in completedPath:
         xOffset = completedPath[node].x - completedPath[node + 1].x
         yOffset = 
@@ -350,7 +351,7 @@ def followPath(grid, start, end):
 def rotateRelativeToPath(x, y, robotCurrentAngleOffset):
     if x == 1 and y == 1:
 
-
+def compute
 
 # 100 / maxX for sidelængde af node
 

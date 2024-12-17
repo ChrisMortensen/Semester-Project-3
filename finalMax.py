@@ -271,14 +271,19 @@ class Node:
 
 def make_grid():
     global grid, grid_size_x, grid_size_y
-    
 
-    # Create grid and set walls to be on the lines
-    for x in range(grid_size_x):
+    def is_on_line(x, y, lines):
+        for line in lines:
+            # Check for vertical and horizontal line segments
+            if (x == line[0][0] and y >= line[0][1] and y <= line[1][1]) or (y == line[0][1] and x >= line[0][0] and x <= line[1][0]):
+                return True
+        return False
+
+    for y in range(grid_size_y):  # Loop over rows (y)
         row_nodes = []
-        for y in range(grid_size_y):
-            node = Node(grid, x, y)
-            if x == lines[0][0][0] or x == lines[1][1][0] or y == lines[0][0][1] or y == lines[0][1][1]:
+        for x in range(grid_size_x):  # Loop over columns (x)
+            node = Node(grid, x, y)  # Create a node at (x, y)
+            if is_on_line(x, y, lines):  # Check if the node is part of a wall line
                 node.wall = True
             row_nodes.append(node)
         grid.append(row_nodes)
@@ -304,6 +309,9 @@ def reconstruct_path(grid, came_from, current):
     return path
 
 def a_star(grid, start, end):
+    if start.wall or end.wall:
+        print("Start or end node is inside a wall!")
+        return
     open_set = [start]
     closed_set = []
     came_from = {}
