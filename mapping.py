@@ -12,6 +12,7 @@ robot_pos = [20,20]             # Robot position in room
 robot_dir = 90                  # Default is right so +90 for up
 map_points = []                 # Mapped points
 map_lines = []                  # Mapped lines
+robot_trail = []                # Mapped trail
 sens_points = [(),(),(),()]     # Latest sensor points
 
 lines = [                       # Room defined using lines
@@ -113,6 +114,7 @@ def merge_lines():
                         return True
 
 def dist_to_wall():
+    global robot_pos, robot_dir, lines
     ray_origin = robot_pos
     dir = robot_dir  # The current direction of the robot
     x = math.cos(math.radians(dir))
@@ -129,14 +131,18 @@ def dist_to_wall():
         return float('inf')  # If no intersection, return infinity
 
 def move(dist):
+    global robot_pos
+    previous_x, previous_y = robot_pos
     robot_pos[0] += math.cos(math.radians(robot_dir)) * dist
     robot_pos[1] += math.sin(math.radians(robot_dir)) * dist
+    current_x, current_y = robot_pos
+    robot_trail.append([(previous_x,previous_y),(current_x,current_y)])
 
 def move_until(dist):
         wall_dist = dist_to_wall()
         while wall_dist > dist:
-            wall_dist = dist_to_wall()
             move(step_size)
+            wall_dist = dist_to_wall()
             map()
             make_map()
             update_graph()
@@ -147,24 +153,27 @@ def update_graph():
     lc = mc.LineCollection(lines, color="blue", linewidths=2, alpha=0)
     ax.add_collection(lc)
 
-
-    # Add the points to the plot
-    if map_points:
-        x_coords, y_coords = zip(*map_points)  # Separate x and y coordinates
-        ax.scatter(x_coords, y_coords, color="red", label="Points", alpha=0)  # Plot points
-
-    # Create the LineCollection of map_lines and plot it
-    lc = mc.LineCollection(map_lines, color="purple", linewidths=2, alpha=1)
+    # Create the LineCollection of robot_trail and plot it
+    lc = mc.LineCollection(robot_trail, color="yellow", label="Path", linewidths=2, alpha=0.5)
     ax.add_collection(lc)
 
-    ax.scatter(robot_pos[0], robot_pos[1], color="blue", label="Robot")  # Plot robot
+    # Add the points to the plot
+    #if map_points:
+    #    x_coords, y_coords = zip(*map_points)  # Separate x and y coordinates
+    #    ax.scatter(x_coords, y_coords, color="red", label="Points", alpha=0)  # Plot points
 
-    robot_dir_x = math.cos(math.radians(robot_dir)) * 5
-    robot_dir_y = math.sin(math.radians(robot_dir)) * 5
+    # Create the LineCollection of map_lines and plot it
+    lc = mc.LineCollection(map_lines, color="purple", label="Walls", linewidths=2, alpha=1)
+    ax.add_collection(lc)
+
+    ax.scatter(robot_pos[0], robot_pos[1], color="blue", label="Robot", alpha=1)  # Plot robot
+
+    robot_dir_x = math.cos(math.radians(robot_dir)) * 3
+    robot_dir_y = math.sin(math.radians(robot_dir)) * 3
     x = [robot_pos[0], robot_pos[0] + robot_dir_x]
     y = [robot_pos[1], robot_pos[1] + robot_dir_y]
 
-    ax.plot(x, y, color="green", alpha=0.5, linewidth=2)
+    ax.plot(x, y, color="blue", alpha=0.5, linewidth=2)
 
 
     # Scale and show the plot
