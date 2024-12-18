@@ -310,7 +310,7 @@ class Node:    # Each coordinate-point in grid is an object of Node
         self.grid = grid
         self.wall = False
         self.g_score = float('inf')    # Distance from start to current node
-        self.f_score = float('inf')    # f_score + g_score (lower = better)
+        self.f_score = float('inf')    # h_score + g_score (lower = better)
 
     def get_neighbors(self):
         # Collection of arrays representing the x and y displacement
@@ -424,7 +424,7 @@ def followPath(grid, start, end):    # Give instructions to robot
         yOffset = completedPath[i + 1].y - completedPath[i].y
         
         # Calculate the target angle relative to the robot's current heading
-        targetHeading = rotateRelativeToPath(xOffset, yOffset, currentHeading)
+        targetHeading = rotateRelativeToPath(xOffset, yOffset)
         
         # Calculate the angle to turn (smallest rotation)
         angleToTurn = targetHeading - currentHeading
@@ -451,7 +451,7 @@ def followPath(grid, start, end):    # Give instructions to robot
         # Update the current heading
         print(f"New heading: {currentHeading} degrees.\n")
 
-def rotateRelativeToPath(x, y, currentHeading):
+def rotateRelativeToPath(x, y):
     # Calculate the target heading based on x and y offset
     # Note: switch-statements not available due to old python version in robot
     if x == 1 and y == 1:
