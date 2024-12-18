@@ -16,7 +16,13 @@ zRotation = 0
 zRotationRaw = 0
 distance = 0    
 rawPoints = []    
-robot_map = []        
+robot_map = []
+map = []
+offset = [0,0]
+offset[0] = 0
+offset[1] = 0
+turnSpeed = 0.001
+maxOffsetAngle = 2        
 offset = [0,0]     
 firstValues = False
 correction_factor = 1.095  
@@ -33,36 +39,120 @@ ser = serial.Serial(arduino_port, baud_rate, timeout=1)
 time.sleep(2)
 
 def findPointValue(points, zRotation, distance):
+    # Convert zRotation to radians
     zRotation_radians = math.radians(zRotation)
-    x = distance * math.cos(zRotation_radians)
-    y = distance * math.sin(zRotation_radians)
+
+    # Calculate the x and y components of the unit vector, then scale by distance
+    x = distance * math.cos(zRotation_radians)      # x component scaled by distance
+    y = distance * math.sin(zRotation_radians)      # y component scaled by distance
     points.append((x, y))
 
 def getSensorInput():
-    global zRotation, distance, firstValues, zRotationRaw, zRotationOffset
-    global sensor_thread_running
-    sensor_thread_running = True
-    ser.reset_input_buffer()
-    while sensor_thread_running:
+    global zRotation, distance, firstValues, zRotationRaw
+    ser.reset_input_buffer()  # Clear the serial input buffer
+    while True:
         if ser.in_waiting > 0:
-            input_data = ser.readline().decode('utf-8').strip()
+            input_data = ser.readline().decode('utf-8').strip()  # Read line, decode to string, and strip newline
             try:
                 gyro_input, distance_input = input_data.split()
+
+                # Convert inputs to floats
                 gyro_input = float(gyro_input)
                 distance_input = float(distance_input)
 
+                # Handle first values initialization
                 if not firstValues:
                     firstValues = True
                     zRotationOffset = gyro_input
 
+                # Adjust gyro input by the offset
                 gyro_input -= zRotationOffset
+                
+                # Get zRotation before normalization
                 zRotationRaw = gyro_input
+
+                # Normalize angle to the range -180 to 180 degrees
                 gyro_input = (gyro_input + 180) % 360 - 180
 
+                # Update global variables
                 distance = distance_input
                 zRotation = gyro_input
+
+                #print(f"Raw-Z | {zRotationRaw}")
+                #print(f"zRotation: {zRotation} | Distance: {distance}")
+
+                # Placeholder for additional processing
+                # findPointValue(rawPoints, zRotation, distance)
+
             except ValueError as e:
+                # Log the error for debugging purposes
                 print(f"Error parsing input: {input_data}, error: {e}")
+
+def smooth_stop(robot, steps):
+    left_value = robot.left_motor.value
+    right_value = robot.right_motor.value
+
+    left_stepsize = left_value / steps
+    right_stepsize = right_value / steps
+    
+    while left_value > 0 or right_value > 0:
+        left_value -= left_stepsize
+        right_value -= right_stepsize
+
+        robot.left_motor.value = left_value
+        robot.right_motor.value = right_value
+
+        time.sleep(0.5 / steps)
+
+def smooth_start(robot, steps, speed):
+    left_value = robot.left_motor.value
+    right_value = robot.right_motor.value
+
+    left_stepsize = (speed - left_value) / steps
+    right_stepsize = (speed - right_value) / steps
+    
+    while left_value < speed or right_value < speed:
+        left_value += left_stepsize
+        right_value += right_stepsize
+
+        robot.left_motor.value = left_value
+        robot.right_motor.value = right_value
+
+        time.sleep(0.5 / steps)
+
+def forward(angle, speed):
+    global zRotationRaw, maxOffsetAngle, turnSpeed, correction_factor
+    angleDiff = angle-zRotationRaw
+    if abs(angleDiff) < maxOffsetAngle:
+        robot.left_motor.value = speed
+        robot.right_motor.value = speed * correction_factor
+    else:
+        if angleDiff > 0:
+            #print("Turn more left | " + str(angleDiff))
+            robot.right_motor.value += turnSpeed
+        if angleDiff < 0:
+            #print("Turn more right | " + str(angleDiff))
+            robot.left_motor.value += turnSpeed
+
+def drive_until(dist, speed):
+    global distance, targetAngle
+    angle = targetAngle
+    # Start driving
+    robot.left_motor.value = speed
+    robot.right_motor.value = speed * correction_factor
+    while distance > dist:
+        forward(angle, speed)
+    robot.stop()
+    #dDist = initialDistance - distance
+    #calcOffset(dDist, angle)
+
+def calcOffset(dist, angle):
+    angle_radians = math.radians(angle)
+    # Calculate the x and y components of the unit vector, then scale by distance
+    x = dist * math.cos(angle_radians)    # x component scaled by distance
+    y = dist * math.sin(angle_radians)    # y component scaled by distance
+    offset[0] += x
+    offset[1] += y
 
 def stop_sensor_thread():
     global sensor_thread_running
@@ -195,8 +285,7 @@ def connect_points():
     [(minX, minY), (minX, maxY)],       # Left box wall
     [(minX, maxY), (maxX, maxY)],       # Top box wall
     [(maxX, maxY), (maxX, minY)],       # Right box wall
-    [(minX, minY), (maxX, minY)]]       # Bottom box wall
-    
+    [(minX, minY), (maxX, minY)]]       # Bottom box wall  
 
 def draw_lines():
     global lines
@@ -347,7 +436,65 @@ def a_star(grid, start, end):
             neighbor.g_score = temp_g_score
             neighbor.f_score = neighbor.g_score + h_score(neighbor, end)
 
+def followPath(grid, start, end):
+    global zRotationRaw, robot
+    completedPath = a_star(grid, start, end)
+    currentHeading = 0  # Assuming robot starts facing 'up' (0 degrees)
 
+    for i in range(len(completedPath) - 1):
+        # Calculate the movement direction from current to next position
+        xOffset = completedPath[i + 1].x - completedPath[i].x
+        yOffset = completedPath[i + 1].y - completedPath[i].y
+        
+        # Calculate the target angle relative to the robot's current heading
+        targetHeading = rotateRelativeToPath(xOffset, yOffset, currentHeading)
+        
+        # Calculate the angle to turn (smallest rotation)
+        angleToTurn = targetHeading - currentHeading
+        if angleToTurn > 180:
+            angleToTurn -= 360  # Turn counter-clockwise (smaller angle)
+        elif angleToTurn < -180:
+            angleToTurn += 360  # Turn clockwise (smaller angle)
+
+        # Output the move with the turn angle
+        print(f"Turning {angleToTurn} degrees to move from position: "
+              f"({completedPath[i].x}, {completedPath[i].y}) "
+              f"to position ({completedPath[i + 1].x}, {completedPath[i + 1].y}).")
+
+        # Rotate and drive forward
+        rotate(angleToTurn)
+        currentHeading = targetHeading  # Update robot's heading
+        forward(zRotationRaw, 0.1)
+        time.sleep(0.5)
+        robot.stop()
+        print(f"Driving forward 5 cm.")
+        
+        # Update the current heading
+        print(f"New heading: {currentHeading} degrees.\n")
+
+def rotateRelativeToPath(x, y, currentHeading):
+    # Calculate the target heading based on x and y offset
+    if x == 1 and y == 1:
+        targetHeading = 45
+    elif x == 1 and y == 0:
+        targetHeading = 90
+    elif x == 1 and y == -1:
+        targetHeading = 135
+    elif x == 0 and y == 1:
+        targetHeading = 0
+    elif x == 0 and y == -1:
+        targetHeading = 180
+    elif x == -1 and y == 1:
+        targetHeading = -45
+    elif x == -1 and y == 0:
+        targetHeading = -90
+    elif x == -1 and y == -1:
+        targetHeading = -135
+    else:
+        print("Coords out of range - something is wrong.")
+        return None
+    
+    return targetHeading
 
 # Sensor input thread
 thread = threading.Thread(target=getSensorInput)
@@ -362,7 +509,11 @@ render_map_ascii()
 print(rawPoints)
 connect_points()
 draw_lines()
-print(find_robot_position()) 
+robotPosition = find_robot_position()
+print(robotPosition)
+make_grid() 
+endNode = grid[3][3]
+followPath(grid, robotPosition, endNode)
 
 stop_sensor_thread()  # Stop sensor input thread after completion
 print("Done")
