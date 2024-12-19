@@ -197,7 +197,7 @@ def render_map_ascii():    # Map is drawn in terminal to visualize room
     for row in grid:
         print(' '.join(row))
 
-def spin_and_map():    # Main function to map the room
+def spin_and_map():    # Function to map the room
     # Robot maps the room by spinning around itself in the middle of the room. Be sure to place robot in the middle.
     spin_speed = 0.1
     start_rotation = zRotationRaw
@@ -209,7 +209,7 @@ def spin_and_map():    # Main function to map the room
     
     # Spin until all rotations have been made
     while True:
-        findPointValue(rawPoints, zRotationRaw, distance + 7.5)
+        findPointValue(rawPoints, zRotationRaw, distance + 2.5)
         if zRotationRaw >= target_rotation:
             break
 
